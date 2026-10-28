@@ -1,0 +1,30 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local database files
+data/*.sqlite
+data/*.sqlite-*
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/coverage/
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+contracts/.forge-home/
+
+# Rust
+relayer/target/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
