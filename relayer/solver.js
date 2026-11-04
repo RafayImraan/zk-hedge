@@ -19,7 +19,7 @@ if (!solverPrivateKey || !process.env.ARBITRUM_SEPOLIA_RPC_URL || !process.env.S
 }
 
 async function main() {
-  const api = (process.env.RELAYER_API_URL || "http://127.0.0.1:8080").replace(/\/+$/, "");
+  const api = (process.env.RELAYER_API_URL || `http://127.0.0.1:${process.env.PORT || 8080}`).replace(/\/+$/, "");
   const response = await fetch(`${api}/api/v1/status/${encodeURIComponent(intentHash)}`);
   if (!response.ok) fail(`Relayer status check failed (HTTP ${response.status}); no transaction was broadcast.`);
   const record = await response.json();

@@ -466,7 +466,11 @@ async fn main() -> anyhow::Result<()> {
         .route("/api/v1/status/{intent_hash}", get(status))
         .route("/api/zcash/account", get(zcash_account))
         .with_state(state);
-    let address: SocketAddr = "127.0.0.1:8080".parse()?;
+    let port = std::env::var("PORT")
+        .ok()
+        .and_then(|value| value.parse::<u16>().ok())
+        .unwrap_or(8080);
+    let address = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = tokio::net::TcpListener::bind(address).await?;
     tracing::info!(%address, "ZK-Hedge relayer listening");
     axum::serve(listener, app).await?;
