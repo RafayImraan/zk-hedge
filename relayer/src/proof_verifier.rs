@@ -33,10 +33,10 @@ pub async fn subscribe_swap_executed_logs(ws_url: String, escrow_address: Addres
     Ok(())
 }
 
-/// Evidence returned only after a successful Arbitrum Sepolia receipt and a
-/// matching `SwapExecuted` event have both been verified.
+/// Evidence returned after a successful Arbitrum Sepolia receipt and its
+/// matching `SwapExecuted` event are verified. This is not a Zcash payout.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct PayoutAuthorization {
+pub struct EvmSwapEvidence {
     pub source_chain_id: u64,
     pub source_transaction_hash: H256,
     pub source_block_number: U64,
@@ -82,15 +82,15 @@ impl ProofVerifier {
         })
     }
 
-    /// Verify a successful escrow settlement before producing a TAZ payout
-    /// authorization. The caller must validate `intent.user_signature` and
+    /// Verify a successful escrow settlement. The caller must validate
+    /// `intent.user_signature` and
     /// ensure `intent_hash` is the hash committed for that signed intent.
-    pub async fn verify_swap_and_authorize_taz_payout(
+    pub async fn verify_swap_execution(
         &self,
         intent: &Intent,
         intent_hash: H256,
         transaction_hash: H256,
-    ) -> Result<PayoutAuthorization> {
+    ) -> Result<EvmSwapEvidence> {
         intent.validate()?;
         anyhow::ensure!(
             intent.target_chain_id == ARBITRUM_SEPOLIA_CHAIN_ID,
@@ -162,13 +162,17 @@ impl ProofVerifier {
                 !escrow_amount.is_zero(),
                 "SwapExecuted amount must be greater than zero"
             );
+            anyhow::ensure!(
+                escrow_amount == U256::from(intent.amount_out),
+                "SwapExecuted amount does not match the signed intent"
+            );
             verified_event = Some(escrow_amount);
         }
 
         let escrow_amount =
             verified_event.context("successful transaction has no matching SwapExecuted event")?;
 
-        Ok(PayoutAuthorization {
+        Ok(EvmSwapEvidence {
             source_chain_id: ARBITRUM_SEPOLIA_CHAIN_ID,
             source_transaction_hash: transaction_hash,
             source_block_number: block_number,
