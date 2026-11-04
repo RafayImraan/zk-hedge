@@ -3,6 +3,10 @@
 .env.*
 !.env.example
 
+# Local-only demo and project notes
+DEMO_RUNBOOK.md
+PROJECT_REPORT.md
+
 # Local database files
 data/*.sqlite
 data/*.sqlite-*
